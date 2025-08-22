@@ -6,3 +6,8 @@ export const getAllUsers = async (req, res) => {
   const users = await User.find().select("-password");
   res.json(users);
 };
+
+export const getAllConversations = async (req, res) => {
+  const conversations = await Conversation.find().populate("participants", "name email");
+  res.json(conversations);
+};
