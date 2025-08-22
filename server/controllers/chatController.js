@@ -29,3 +29,23 @@ export const sendMessage = async (req, res) => {
     res.status(500).json({ message: err.message });
   }
 };
+
+export const getConversation = async (req, res) => {
+  try {
+    const conversation = await Conversation.findOne({
+      participants: req.user._id,
+    });
+
+    if (!conversation) {
+      const newConversation = await Conversation.create({
+        participants: [req.user._id],
+      });
+      return res.json({ conversation: newConversation, messages: [] });
+    }
+
+    const messages = await Message.find({ conversation: conversation._id });
+    res.json({ conversation, messages });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+};
