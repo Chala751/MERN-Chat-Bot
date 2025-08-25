@@ -4,6 +4,7 @@ import ProtectedRoute from './components/ProtectedRoute';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import Chatbot from './pages/Chatbot';
+import AdminDashboard from './pages/AdminDashboard';
 
 function App() {
   return (
@@ -22,7 +23,7 @@ function App() {
         path="/admin"
         element={
           <ProtectedRoute adminOnly>
-            <AdminDashboard />
+            <AdminDashboard/>
           </ProtectedRoute>
         }
       />
