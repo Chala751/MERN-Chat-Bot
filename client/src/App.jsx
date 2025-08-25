@@ -1,5 +1,6 @@
 import React from 'react'
 import { Routes, Route } from "react-router-dom";
+import  { Toaster } from "react-hot-toast";
 import ProtectedRoute from './components/ProtectedRoute';
 import Login from './pages/Login';
 import Register from './pages/Register';
@@ -8,6 +9,8 @@ import AdminDashboard from './pages/AdminDashboard';
 
 function App() {
   return (
+    <>
+    <Toaster position="top-right" reverseOrder={false} />
     <Routes>
       <Route path="/" element={<Login/>} />
       <Route path="/register" element={<Register/>} />
@@ -28,6 +31,7 @@ function App() {
         }
       />
     </Routes>
+    </>
   )
 }
 
