@@ -1,45 +1,86 @@
 import { useEffect, useState } from "react";
+import { FaSignOutAlt } from "react-icons/fa";
 import api from "../api/axios";
 import { useAuth } from "../context/AuthContext";
+import toast from "react-hot-toast";
 
 const AdminDashboard = () => {
-  const { user } = useAuth();
+  const { user, logout } = useAuth();
   const [users, setUsers] = useState([]);
   const [conversations, setConversations] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchData = async () => {
-      const resUsers = await api.get("/admin/users", {
-        headers: { Authorization: `Bearer ${user.token}` },
-      });
-      const resConvos = await api.get("/admin/conversations", {
-        headers: { Authorization: `Bearer ${user.token}` },
-      });
-      setUsers(resUsers.data);
-      setConversations(resConvos.data);
+      try {
+        const resUsers = await api.get("/admin/users", {
+          headers: { Authorization: `Bearer ${user.token}` },
+        });
+        const resConvos = await api.get("/admin/conversations", {
+          headers: { Authorization: `Bearer ${user.token}` },
+        });
+        setUsers(resUsers.data);
+        setConversations(resConvos.data);
+        toast.success("Data loaded successfully ✅");
+      } catch (err) {
+        console.error(err);
+        toast.error(err.response?.data?.message || "Failed to fetch data ❌");
+      } finally {
+        setLoading(false);
+      }
     };
     fetchData();
   }, [user]);
 
+  if (loading) return <div className="p-6 text-center">Loading...</div>;
+
   return (
-    <div className="p-6">
-      <h1 className="text-2xl font-bold mb-4">Admin Dashboard</h1>
+    <div className="p-6 bg-gray-100 min-h-screen">
+      <div className="flex justify-between items-center mb-6">
+        <h1 className="text-3xl font-bold text-gray-800">Admin Dashboard</h1>
+        <button
+          onClick={() => {
+            logout();
+            toast.success("Logged out successfully ✅");
+          }}
+          className="flex items-center gap-2 px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600 transition cursor-pointer"
+        >
+          <FaSignOutAlt /> Logout
+        </button>
+      </div>
 
-      <h2 className="text-xl font-semibold">Users</h2>
-      <ul className="mb-4">
-        {users.map((u) => (
-          <li key={u._id}>
-            {u.name} - {u.email} ({u.role})
-          </li>
-        ))}
-      </ul>
+      <div className="grid md:grid-cols-2 gap-6">
+        <div className="bg-white p-4 rounded shadow">
+          <h2 className="text-xl font-semibold mb-3 text-gray-700">Users</h2>
+          <ul className="space-y-2 max-h-64 overflow-y-auto">
+            {users.map((u) => (
+              <li
+                key={u._id}
+                className="p-2 border rounded hover:bg-gray-50 transition flex justify-between"
+              >
+                <span>
+                  {u.name} - {u.email}
+                </span>
+                <span className="font-medium text-sm text-gray-500">{u.role}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
 
-      <h2 className="text-xl font-semibold">Conversations</h2>
-      <ul>
-        {conversations.map((c) => (
-          <li key={c._id}>{c.participants.map((p) => p.name).join(", ")}</li>
-        ))}
-      </ul>
+        <div className="bg-white p-4 rounded shadow">
+          <h2 className="text-xl font-semibold mb-3 text-gray-700">Conversations</h2>
+          <ul className="space-y-2 max-h-64 overflow-y-auto">
+            {conversations.map((c) => (
+              <li
+                key={c._id}
+                className="p-2 border rounded hover:bg-gray-50 transition"
+              >
+                {c.participants.map((p) => p.name).join(", ")}
+              </li>
+            ))}
+          </ul>
+        </div>
+      </div>
     </div>
   );
 };
