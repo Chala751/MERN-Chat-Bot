@@ -1,5 +1,6 @@
-import { FaSignOutAlt, FaTachometerAlt, FaUsers, FaComments, FaRobot } from "react-icons/fa";
+import { FaSignOutAlt, FaTachometerAlt,  FaComments } from "react-icons/fa";
 import { useAuth } from "../context/AuthContext";
+import { NavLink } from "react-router-dom";
 import toast from "react-hot-toast";
 
 const Sidebar = () => {
@@ -9,6 +10,10 @@ const Sidebar = () => {
     logout();
     toast.success("Logged out successfully ✅");
   };
+
+  // Active link styling
+  const activeClass = "bg-gray-700 rounded px-2 py-2 flex items-center gap-3 transition";
+  const inactiveClass = "px-2 py-2 flex items-center gap-3 hover:bg-gray-700 rounded transition";
 
   return (
     <div className="w-64 bg-gray-900 text-white flex flex-col h-screen p-6 shadow-lg">
@@ -26,23 +31,27 @@ const Sidebar = () => {
 
       {/* Navigation */}
       <nav className="flex-1">
-        <ul className="space-y-3">
-          <li className="flex items-center gap-3 p-2 rounded hover:bg-gray-700 cursor-pointer transition">
-            <FaTachometerAlt className="text-blue-400" />
-            <span>Dashboard</span>
+        <ul className="space-y-2">
+          <li>
+            <NavLink
+              to="/dashboard"
+              className={({ isActive }) => (isActive ? activeClass : inactiveClass)}
+            >
+              <FaTachometerAlt className="text-blue-400" />
+              <span>Dashboard</span>
+            </NavLink>
           </li>
-          <li className="flex items-center gap-3 p-2 rounded hover:bg-gray-700 cursor-pointer transition">
-            <FaUsers className="text-green-400" />
-            <span>Users</span>
+          
+          <li>
+            <NavLink
+              to="/chat"
+              className={({ isActive }) => (isActive ? activeClass : inactiveClass)}
+            >
+              <FaComments className="text-yellow-400" />
+              <span>Conversations</span>
+            </NavLink>
           </li>
-          <li className="flex items-center gap-3 p-2 rounded hover:bg-gray-700 cursor-pointer transition">
-            <FaComments className="text-yellow-400" />
-            <span>Conversations</span>
-          </li>
-          <li className="flex items-center gap-3 p-2 rounded hover:bg-gray-700 cursor-pointer transition">
-            <FaRobot className="text-purple-400" />
-            <span>Bot Messages</span>
-          </li>
+          
         </ul>
       </nav>
 
