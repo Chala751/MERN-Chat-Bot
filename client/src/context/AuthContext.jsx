@@ -10,7 +10,12 @@ export const AuthProvider = ({ children }) => {
   const login = (userData) => {
     localStorage.setItem("user", JSON.stringify(userData));
     setUser(userData);
-    navigate("/chat");
+     // Redirect based on role
+    if (userData.role === "admin") {
+      navigate("/admin");
+    } else {
+      navigate("/chat");
+    }
   };
 
   const logout = () => {

@@ -10,11 +10,12 @@ const Register = () => {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [isAdmin, setIsAdmin] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const res = await api.post("/auth/register", { name, email, password });
+      const res = await api.post("/auth/register", { name, email, password, role: isAdmin ? "admin" : "user" });
       login(res.data);
       toast.success("Account created successfully 🎉");
       navigate("/"); // redirect after successful register
@@ -51,6 +52,14 @@ const Register = () => {
           value={password}
           onChange={(e) => setPassword(e.target.value)}
         />
+        <label className="flex items-center space-x-2 mt-2">
+           <input
+              type="checkbox"
+              checked={isAdmin}
+              onChange={(e) => setIsAdmin(e.target.checked)}
+            />
+           <span>Register as Admin</span>
+        </label>
         <button className="w-full p-2 bg-green-500 text-white rounded cursor-pointer">
           Register
         </button>
