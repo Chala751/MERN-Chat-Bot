@@ -33,7 +33,7 @@ export const deleteUser = async (req, res) => {
     await Conversation.deleteMany({ participants: id });
     await Message.deleteMany({ sender: id });
 
-    await user.remove();
+    await user.deleteOne(); 
     res.json({ message: "User deleted successfully" });
   } catch (err) {
     res.status(500).json({ message: err.message });

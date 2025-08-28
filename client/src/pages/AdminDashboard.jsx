@@ -4,12 +4,42 @@ import api from "../api/axios";
 import { useAuth } from "../context/AuthContext";
 import toast from "react-hot-toast";
 
+// Custom confirmation modal
+const ConfirmModal = ({ open, onClose, onConfirm, message }) => {
+  if (!open) return null;
+  return (
+    <div className="fixed inset-0 bg-black bg-opacity-30 flex items-center justify-center z-50">
+      <div className="bg-white p-6 rounded shadow w-80">
+        <p className="mb-4">{message}</p>
+        <div className="flex justify-end gap-2">
+          <button
+            onClick={onClose}
+            className="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400 cursor-pointer"
+          >
+            Cancel
+          </button>
+          <button
+            onClick={onConfirm}
+            className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600 cursor-pointer"
+          >
+            Delete
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 const AdminDashboard = () => {
   const { user, logout } = useAuth();
   const [users, setUsers] = useState([]);
   const [conversations, setConversations] = useState([]);
-  const [loading, setLoading] = useState(true);
   const [messages, setMessages] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  // State for confirmation modal
+  const [modalOpen, setModalOpen] = useState(false);
+  const [selectedUser, setSelectedUser] = useState(null);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -37,20 +67,24 @@ const AdminDashboard = () => {
     fetchData();
   }, [user]);
 
+  // Delete user function
   const handleDeleteUser = async (userId) => {
-    if (!window.confirm("Are you sure you want to delete this user?")) return;
-     try {
-       await api.delete(`/admin/users/${userId}`, {
-       headers: { Authorization: `Bearer ${user.token}` },
-       });
-       setUsers((prev) => prev.filter((u) => u._id !== userId));
-       toast.success("User deleted ✅");
-     } catch (err) {
-       console.error(err);
-       toast.error(err.response?.data?.message || "Failed to delete user ❌");
-     }
-   };
+    try {
+      await api.delete(`/admin/users/${userId}`, {
+        headers: { Authorization: `Bearer ${user.token}` },
+      });
+      setUsers((prev) => prev.filter((u) => u._id !== userId));
+      toast.success("User deleted ✅");
+    } catch (err) {
+      console.error(err);
+      toast.error(err.response?.data?.message || "Failed to delete user ❌");
+    }
+  };
 
+  const confirmDelete = (user) => {
+    setSelectedUser(user);
+    setModalOpen(true);
+  };
 
   if (loading) return <div className="p-6 text-center">Loading...</div>;
 
@@ -70,21 +104,22 @@ const AdminDashboard = () => {
       </div>
 
       <div className="grid md:grid-cols-2 gap-6">
+        {/* Users Section */}
         <div className="bg-white p-4 rounded shadow">
           <h2 className="text-xl font-semibold mb-3 text-gray-700">Users</h2>
           <ul className="space-y-2 max-h-64 overflow-y-auto">
             {users.map((u) => (
               <li
                 key={u._id}
-                className="p-2 border rounded hover:bg-gray-50 transition flex justify-between"
+                className="p-2 border rounded hover:bg-gray-50 transition flex justify-between items-center"
               >
-                <span>
-                  {u.name} - {u.email}
-                </span>
-                <span className="font-medium text-sm text-gray-500">{u.role}</span>
+                <div>
+                  {u.name} - {u.email}{" "}
+                  <span className="font-medium text-sm text-gray-500">{u.role}</span>
+                </div>
                 <button
-                    onClick={() => handleDeleteUser(u._id)}
-                     className="px-2 py-1 bg-red-500 text-white rounded hover:bg-red-600 transition text-sm cursor-pointer"
+                  onClick={() => confirmDelete(u)}
+                  className="px-2 py-1 bg-red-500 text-white rounded hover:bg-red-600 transition text-sm cursor-pointer"
                 >
                   Delete
                 </button>
@@ -93,6 +128,7 @@ const AdminDashboard = () => {
           </ul>
         </div>
 
+        {/* Conversations Section */}
         <div className="bg-white p-4 rounded shadow">
           <h2 className="text-xl font-semibold mb-3 text-gray-700">Conversations</h2>
           <ul className="space-y-2 max-h-64 overflow-y-auto">
@@ -106,11 +142,16 @@ const AdminDashboard = () => {
             ))}
           </ul>
         </div>
-        <div className="bg-white p-4 rounded shadow mt-6">
+
+        {/* Messages Section */}
+        <div className="bg-white p-4 rounded shadow mt-6 md:mt-0">
           <h2 className="text-xl font-semibold mb-3 text-gray-700">Messages</h2>
           <ul className="space-y-2 max-h-64 overflow-y-auto">
             {messages.map((msg) => (
-              <li key={msg._id} className="p-2 border rounded hover:bg-gray-50 transition">
+              <li
+                key={msg._id}
+                className="p-2 border rounded hover:bg-gray-50 transition"
+              >
                 <span className="font-medium">{msg.sender ? msg.sender.name : "Bot"}:</span>{" "}
                 {msg.text}
                 <div className="text-xs text-gray-400">
@@ -120,8 +161,18 @@ const AdminDashboard = () => {
             ))}
           </ul>
         </div>
-
       </div>
+
+      {/* Confirm Modal */}
+      <ConfirmModal
+        open={modalOpen}
+        onClose={() => setModalOpen(false)}
+        onConfirm={() => {
+          handleDeleteUser(selectedUser._id);
+          setModalOpen(false);
+        }}
+        message={`Are you sure you want to delete ${selectedUser?.name}?`}
+      />
     </div>
   );
 };
