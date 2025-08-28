@@ -1,10 +1,13 @@
 import { useEffect, useState } from "react";
+import { FaHome } from "react-icons/fa";
+import { useNavigate } from "react-router-dom";
 import api from "../api/axios";
 import { useAuth } from "../context/AuthContext";
 import toast from "react-hot-toast";
 
 const UserDashboard = () => {
   const { user, logout } = useAuth();
+  const navigate = useNavigate();
   const [conversations, setConversations] = useState([]);
   const [messages, setMessages] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -35,17 +38,25 @@ const UserDashboard = () => {
 
   return (
     <div className="p-6 bg-gray-100 min-h-screen">
-      <div className="flex justify-between items-center mb-6">
+      <div className="flex justify-between items-center mb-6 gap-2">
         <h1 className="text-3xl font-bold text-gray-800">User Dashboard</h1>
-        <button
-          onClick={() => {
-            logout();
-            toast.success("Logged out successfully ✅");
-          }}
-          className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600 transition cursor-pointer"
-        >
-          Logout
-        </button>
+        <div className="flex gap-2">
+          <button
+            onClick={() => navigate("/chat")}
+            className="flex items-center gap-2 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition cursor-pointer"
+          >
+            <FaHome /> Back to Home
+          </button>
+          <button
+            onClick={() => {
+              logout();
+              toast.success("Logged out successfully ✅");
+            }}
+            className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600 transition cursor-pointer"
+          >
+            Logout
+          </button>
+        </div>
       </div>
 
       {/* User Info */}
