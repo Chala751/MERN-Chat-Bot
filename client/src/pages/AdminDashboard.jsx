@@ -37,6 +37,21 @@ const AdminDashboard = () => {
     fetchData();
   }, [user]);
 
+  const handleDeleteUser = async (userId) => {
+    if (!window.confirm("Are you sure you want to delete this user?")) return;
+     try {
+       await api.delete(`/admin/users/${userId}`, {
+       headers: { Authorization: `Bearer ${user.token}` },
+       });
+       setUsers((prev) => prev.filter((u) => u._id !== userId));
+       toast.success("User deleted ✅");
+     } catch (err) {
+       console.error(err);
+       toast.error(err.response?.data?.message || "Failed to delete user ❌");
+     }
+   };
+
+
   if (loading) return <div className="p-6 text-center">Loading...</div>;
 
   return (
@@ -67,6 +82,12 @@ const AdminDashboard = () => {
                   {u.name} - {u.email}
                 </span>
                 <span className="font-medium text-sm text-gray-500">{u.role}</span>
+                <button
+                    onClick={() => handleDeleteUser(u._id)}
+                     className="px-2 py-1 bg-red-500 text-white rounded hover:bg-red-600 transition text-sm cursor-pointer"
+                >
+                  Delete
+                </button>
               </li>
             ))}
           </ul>
