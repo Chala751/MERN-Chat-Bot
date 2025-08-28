@@ -34,7 +34,7 @@ const Sidebar = () => {
         <ul className="space-y-2">
           <li>
             <NavLink
-              to="/dashboard"
+              to="/userdashboard"
               className={({ isActive }) => (isActive ? activeClass : inactiveClass)}
             >
               <FaTachometerAlt className="text-blue-400" />

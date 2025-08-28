@@ -6,6 +6,7 @@ import Login from './pages/Login';
 import Register from './pages/Register';
 import Chatbot from './pages/Chatbot';
 import AdminDashboard from './pages/AdminDashboard';
+import UserDashboard from './pages/UserDashboard';
 
 function App() {
   return (
@@ -19,6 +20,14 @@ function App() {
         element={
           <ProtectedRoute>
             <Chatbot/>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/userdashboard"
+        element={
+          <ProtectedRoute>
+            <UserDashboard/>
           </ProtectedRoute>
         }
       />
