@@ -9,6 +9,7 @@ const AdminDashboard = () => {
   const [users, setUsers] = useState([]);
   const [conversations, setConversations] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [messages, setMessages] = useState([]);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -19,8 +20,12 @@ const AdminDashboard = () => {
         const resConvos = await api.get("/admin/conversations", {
           headers: { Authorization: `Bearer ${user.token}` },
         });
+        const resMessages = await api.get("/admin/messages", {
+          headers: { Authorization: `Bearer ${user.token}` },
+        });
         setUsers(resUsers.data);
         setConversations(resConvos.data);
+        setMessages(resMessages.data);
         toast.success("Data loaded successfully ✅");
       } catch (err) {
         console.error(err);
@@ -80,6 +85,21 @@ const AdminDashboard = () => {
             ))}
           </ul>
         </div>
+        <div className="bg-white p-4 rounded shadow mt-6">
+          <h2 className="text-xl font-semibold mb-3 text-gray-700">Messages</h2>
+          <ul className="space-y-2 max-h-64 overflow-y-auto">
+            {messages.map((msg) => (
+              <li key={msg._id} className="p-2 border rounded hover:bg-gray-50 transition">
+                <span className="font-medium">{msg.sender ? msg.sender.name : "Bot"}:</span>{" "}
+                {msg.text}
+                <div className="text-xs text-gray-400">
+                  Conversation ID: {msg.conversation._id}
+                </div>
+              </li>
+            ))}
+          </ul>
+        </div>
+
       </div>
     </div>
   );
