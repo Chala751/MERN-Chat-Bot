@@ -2,34 +2,51 @@ import { useEffect, useState } from "react";
 import api from "../api/axios";
 import { useAuth } from "../context/AuthContext";
 import MessageItem from "./MessageItem";
+import toast from "react-hot-toast";
 
 const ChatWindow = () => {
   const { user } = useAuth();
   const [messages, setMessages] = useState([]);
+  const [conversation, setConversation] = useState(null); // store conversation
   const [input, setInput] = useState("");
 
   useEffect(() => {
     const fetchConversation = async () => {
-      const res = await api.get("/chat", {
-        headers: { Authorization: `Bearer ${user.token}` },
-      });
-      setMessages(res.data.messages);
+      try {
+        const res = await api.get("/chat", {
+          headers: { Authorization: `Bearer ${user.token}` },
+        });
+        setConversation(res.data.conversation); // save conversation
+        setMessages(res.data.messages);
+      } catch (err) {
+        console.error(err);
+        toast.error("Failed to fetch messages ❌");
+      }
     };
     fetchConversation();
   }, [user]);
 
   const sendMessage = async (e) => {
     e.preventDefault();
-    if (!input.trim()) return;
+    if (!input.trim() || !conversation) return;
 
-    const res = await api.post(
-      "/chat/send",
-      { conversationId: messages[0]?.conversation || res?.data?.conversation?._id, text: input },
-      { headers: { Authorization: `Bearer ${user.token}` } }
-    );
+    try {
+      const res = await api.post(
+        "/chat/send",
+        {
+          conversationId: conversation._id, // use stored conversation
+          text: input,
+        },
+        { headers: { Authorization: `Bearer ${user.token}` } }
+      );
 
-    setMessages((prev) => [...prev, ...res.data.messages]);
-    setInput("");
+      setMessages((prev) => [...prev, ...res.data.messages]);
+      setInput("");
+      toast.success("Message sent ✅");
+    } catch (err) {
+      console.error(err);
+      toast.error(err.response?.data?.message || "Failed to send message ❌");
+    }
   };
 
   return (
@@ -46,7 +63,10 @@ const ChatWindow = () => {
           onChange={(e) => setInput(e.target.value)}
           placeholder="Type a message..."
         />
-        <button type="submit" className="ml-2 px-4 py-2 bg-blue-500 text-white rounded">
+        <button
+          type="submit"
+          className="ml-2 px-4 py-2 bg-blue-500 text-white rounded cursor-pointer"
+        >
           Send
         </button>
       </form>
