@@ -1,57 +1,31 @@
-import { useEffect, useState } from "react";
-import { FaHome } from "react-icons/fa";
+import { FaHome, FaUser, FaComments, FaCogs } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
-import api from "../api/axios";
 import { useAuth } from "../context/AuthContext";
 import toast from "react-hot-toast";
 
 const UserDashboard = () => {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
-  const [conversations, setConversations] = useState([]);
-  const [messages, setMessages] = useState([]);
-  const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const resConvos = await api.get("/user/conversations", {
-          headers: { Authorization: `Bearer ${user.token}` },
-        });
-        const resMessages = await api.get("/user/messages", {
-          headers: { Authorization: `Bearer ${user.token}` },
-        });
-        setConversations(resConvos.data);
-        setMessages(resMessages.data);
-        toast.success("Data loaded successfully ✅");
-      } catch (err) {
-        console.error(err);
-        toast.error(err.response?.data?.message || "Failed to fetch data ❌");
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchData();
-  }, [user]);
-
-  if (loading) return <div className="p-6 text-center">Loading...</div>;
+  const handleLogout = () => {
+    logout();
+    toast.success("Logged out successfully ✅");
+  };
 
   return (
     <div className="p-6 bg-gray-100 min-h-screen">
-      <div className="flex justify-between items-center mb-6 gap-2">
-        <h1 className="text-3xl font-bold text-gray-800">User Dashboard</h1>
+      {/* Header */}
+      <div className="flex justify-between items-center mb-8">
+        <h1 className="text-3xl font-bold text-gray-800">Welcome, {user.name}!</h1>
         <div className="flex gap-2">
           <button
             onClick={() => navigate("/chat")}
             className="flex items-center gap-2 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition cursor-pointer"
           >
-            <FaHome /> Back to Home
+            <FaHome /> Home
           </button>
           <button
-            onClick={() => {
-              logout();
-              toast.success("Logged out successfully ✅");
-            }}
+            onClick={handleLogout}
             className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600 transition cursor-pointer"
           >
             Logout
@@ -59,53 +33,41 @@ const UserDashboard = () => {
         </div>
       </div>
 
-      {/* User Info */}
-      <div className="bg-white p-4 rounded shadow mb-6">
-        <h2 className="text-xl font-semibold mb-2 text-gray-700">Profile</h2>
-        <p>
-          <span className="font-medium">Name:</span> {user.name}
-        </p>
-        <p>
-          <span className="font-medium">Email:</span> {user.email}
-        </p>
-        <p>
-          <span className="font-medium">Role:</span> {user.role}
-        </p>
+      {/* Stats Cards */}
+      <div className="grid md:grid-cols-3 gap-6 mb-8">
+        <div className="bg-white p-6 rounded shadow flex items-center gap-4">
+          <FaUser className="text-blue-400 text-3xl" />
+          <div>
+            <p className="text-gray-500">Role</p>
+            <p className="text-xl font-bold">{user.role}</p>
+          </div>
+        </div>
+        
+        
       </div>
 
-      <div className="grid md:grid-cols-2 gap-6">
-        {/* Conversations Section */}
-        <div className="bg-white p-4 rounded shadow">
-          <h2 className="text-xl font-semibold mb-3 text-gray-700">Conversations</h2>
-          <ul className="space-y-2 max-h-64 overflow-y-auto">
-            {conversations.map((c) => (
-              <li
-                key={c._id}
-                className="p-2 border rounded hover:bg-gray-50 transition"
-              >
-                {c.participants.map((p) => p.name).join(", ")}
-              </li>
-            ))}
-          </ul>
+      {/* Quick Links / Actions */}
+      <div className="grid md:grid-cols-3 gap-6">
+        <div
+          onClick={() => navigate("/profile")}
+          className="bg-white p-6 rounded shadow flex flex-col items-center justify-center hover:shadow-lg cursor-pointer transition"
+        >
+          <FaUser className="text-4xl text-blue-400 mb-2" />
+          <p className="font-semibold text-gray-700">Profile</p>
         </div>
-
-        {/* Messages Section */}
-        <div className="bg-white p-4 rounded shadow">
-          <h2 className="text-xl font-semibold mb-3 text-gray-700">Messages</h2>
-          <ul className="space-y-2 max-h-64 overflow-y-auto">
-            {messages.map((msg) => (
-              <li
-                key={msg._id}
-                className="p-2 border rounded hover:bg-gray-50 transition"
-              >
-                <span className="font-medium">{msg.sender ? msg.sender.name : "Bot"}:</span>{" "}
-                {msg.text}
-                <div className="text-xs text-gray-400">
-                  Conversation ID: {msg.conversation._id}
-                </div>
-              </li>
-            ))}
-          </ul>
+        <div
+          onClick={() => navigate("/chat")}
+          className="bg-white p-6 rounded shadow flex flex-col items-center justify-center hover:shadow-lg cursor-pointer transition"
+        >
+          <FaComments className="text-4xl text-yellow-400 mb-2" />
+          <p className="font-semibold text-gray-700">Chat</p>
+        </div>
+        <div
+          onClick={() => navigate("/settings")}
+          className="bg-white p-6 rounded shadow flex flex-col items-center justify-center hover:shadow-lg cursor-pointer transition"
+        >
+          <FaCogs className="text-4xl text-purple-400 mb-2" />
+          <p className="font-semibold text-gray-700">Settings</p>
         </div>
       </div>
     </div>
