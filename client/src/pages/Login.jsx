@@ -50,7 +50,7 @@ const Login = () => {
         <button
           type="submit"
           disabled={loading}
-          className="w-full p-2 bg-blue-500 text-white rounded disabled:opacity-50"
+          className="w-full p-2 bg-blue-500 text-white rounded disabled:opacity-50 cursor-pointer"
         >
           {loading ? "Logging in..." : "Login"}
         </button>
