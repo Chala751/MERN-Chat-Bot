@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { FaSignOutAlt } from "react-icons/fa";
+import { FaSignOutAlt, FaUsers, FaUserShield, FaRobot } from "react-icons/fa";
 import api from "../api/axios";
 import { useAuth } from "../context/AuthContext";
 import toast from "react-hot-toast";
@@ -44,15 +44,11 @@ const AdminDashboard = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const resUsers = await api.get("/admin/users", {
-          headers: { Authorization: `Bearer ${user.token}` },
-        });
-        const resConvos = await api.get("/admin/conversations", {
-          headers: { Authorization: `Bearer ${user.token}` },
-        });
-        const resMessages = await api.get("/admin/messages", {
-          headers: { Authorization: `Bearer ${user.token}` },
-        });
+        const [resUsers, resConvos, resMessages] = await Promise.all([
+          api.get("/admin/users", { headers: { Authorization: `Bearer ${user.token}` } }),
+          api.get("/admin/conversations", { headers: { Authorization: `Bearer ${user.token}` } }),
+          api.get("/admin/messages", { headers: { Authorization: `Bearer ${user.token}` } }),
+        ]);
         setUsers(resUsers.data);
         setConversations(resConvos.data);
         setMessages(resMessages.data);
@@ -88,8 +84,15 @@ const AdminDashboard = () => {
 
   if (loading) return <div className="p-6 text-center">Loading...</div>;
 
+  // Summary counts
+  const totalUsers = users.length;
+  const totalAdmins = users.filter((u) => u.role === "admin").length;
+  const totalRegular = users.filter((u) => u.role === "user").length;
+  const totalBotMessages = messages.filter((m) => !m.sender).length;
+
   return (
     <div className="p-6 bg-gray-100 min-h-screen">
+      {/* Header */}
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-3xl font-bold text-gray-800">Admin Dashboard</h1>
         <button
@@ -103,6 +106,39 @@ const AdminDashboard = () => {
         </button>
       </div>
 
+      {/* Summary Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+        <div className="bg-white p-4 rounded shadow flex items-center gap-4">
+          <FaUsers className="text-3xl text-blue-500" />
+          <div>
+            <p className="text-gray-500 text-sm">Total Users</p>
+            <p className="text-xl font-bold">{totalUsers}</p>
+          </div>
+        </div>
+        <div className="bg-white p-4 rounded shadow flex items-center gap-4">
+          <FaUserShield className="text-3xl text-green-500" />
+          <div>
+            <p className="text-gray-500 text-sm">Admins</p>
+            <p className="text-xl font-bold">{totalAdmins}</p>
+          </div>
+        </div>
+        <div className="bg-white p-4 rounded shadow flex items-center gap-4">
+          <FaUsers className="text-3xl text-purple-500" />
+          <div>
+            <p className="text-gray-500 text-sm">Regular Users</p>
+            <p className="text-xl font-bold">{totalRegular}</p>
+          </div>
+        </div>
+        <div className="bg-white p-4 rounded shadow flex items-center gap-4">
+          <FaRobot className="text-3xl text-yellow-500" />
+          <div>
+            <p className="text-gray-500 text-sm">Bot Messages</p>
+            <p className="text-xl font-bold">{totalBotMessages}</p>
+          </div>
+        </div>
+      </div>
+
+      {/* Main Grid */}
       <div className="grid md:grid-cols-2 gap-6">
         {/* Users Section */}
         <div className="bg-white p-4 rounded shadow">
